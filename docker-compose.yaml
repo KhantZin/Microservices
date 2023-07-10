@@ -1,0 +1,40 @@
+version: '3.7'
+
+services:
+  naming-server:
+    image: kaolin295/mmv3-naming-server:0.0.1-SNAPSHOT
+    container_name: "naming-server"
+    ports:
+      - "8761:8761"
+    networks:
+      - currency-network
+
+  currency-exchange:
+    image: kaolin295/mmv3-currency-exchange-service:0.0.1-SNAPSHOT
+    container_name: "currency-exchange"
+    ports:
+      - "8000:8000"
+    networks:
+      - currency-network
+    depends_on:
+      - naming-server
+    environment:
+      EUREKA.CLIENT.SERVICEURL.DEFAULTZONE: http://naming-server:8761/eureka/
+      EUREKA.CLIENT.FETCHREGISTRY: "true"
+      EUREKA.INSTANCE.PREFERIPADDRESS: "true"
+
+  currency-conversion:
+    image: kaolin295/mmv3-currency-conversion-service:0.0.1-SNAPSHOT
+    container_name: "currency-conversion"
+    ports:
+      - "8100:8100"
+    networks:
+      - currency-network
+    depends_on:
+      - naming-server
+    environment:
+      eureka.client.serviceUrl.defaultZone: http://naming-server:8761/eureka/
+
+
+networks:
+  currency-network:
